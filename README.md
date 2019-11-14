@@ -15,6 +15,10 @@ Data models are the wrapper classes to the JSON strings or php arrays (markup la
 - Ability to implement custom cast types
 - Manipulate the object and make it array or serialize to JSON back
 
+## Install
+
+    composer require cangelis/data-models
+
 ## Usage
 
 Imagine you have a JSON data for a blog post looks like this
