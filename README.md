@@ -1,5 +1,7 @@
 # Data models
 
+[![Build Status](https://travis-ci.org/cangelis/data-models.svg?branch=master)](https://travis-ci.org/cangelis/data-models)
+
 Data models is the beautiful way of working with structured data such as JSON and php arrays. They are basically wrapper classes to the JSON strings or php arrays (markup languages in the future). Models simplify the manipulation and processing workflow of the JSON or php arrays.
 
 ## Pros
