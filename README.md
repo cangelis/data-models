@@ -6,16 +6,17 @@ Data models is the beautiful way of working with structured data such as JSON an
 
 ## Pros
 
+- Straightforward to get started (this page will tell you all the features)
 - Avoid undefined index by design
 - Dynamic access to the model properties so no need of mapping the class properties with JSON attributes
 - IDE auto-completion using `@property` docblock and make the API usage documented by default
-- Set has many and has one relationships between models
+- Has many and has one relationships between models
 - Ability to assign default values for the attributes so the undefined attributes can be handled reliably
 - Ability to add logic into the JSON data in the model
 - Cast values to known types such as integer, string, float, boolean
 - Cast values to Carbon object to work on date attributes easily
 - Ability to implement custom cast types
-- Manipulate the object and make it array or serialize to JSON back
+- Manipulate and work on the object models instead of arrays and make them array or serialize to JSON back
 
 ## Install
 
@@ -207,3 +208,6 @@ $post->toArray()
 ['id' => 1, 'user' => 2]
 
 ```
+## Contribution
+
+Feel free to contribute!
