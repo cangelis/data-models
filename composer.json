@@ -1,6 +1,6 @@
 {
   "name": "cangelis/data-models",
-  "description": "Data models is the beautiful way of working with data such as JSON and PHP arrays",
+  "description": "Data models is the beautiful way of working with structured data such as JSON and PHP arrays",
   "keywords": ["json", "mapper", "data", "dto", "xml", "array"],
   "license": "MIT",
   "authors": [
