@@ -1,12 +1,12 @@
 # Data models
 
-Data models are the wrapper classes to the JSON strings or php arrays (markup languages in the future). Models simplifies the manipulation and processing workflow for the JSON or array objects.
+Data models is the beautiful way of working with structured data such as JSON and php arrays. They are basically wrapper classes to the JSON strings or php arrays (markup languages in the future). Models simplify the manipulation and processing workflow of the JSON or php arrays.
 
 ## Pros
 
 - Avoid undefined index by design
 - Dynamic access to the model properties so no need of mapping the class properties with JSON attributes
-- IDE auto-completion using `@property` docblock
+- IDE auto-completion using `@property` docblock and make the API usage documented by default
 - Set has many and has one relationships between models
 - Ability to assign default values for the attributes so the undefined attributes can be handled reliably
 - Ability to add logic into the JSON data in the model
@@ -51,10 +51,10 @@ use CanGelis\DataModels\Cast\BooleanCast;
 use CanGelis\DataModels\Cast\DateTimeCast;
 
 /**
-* Define docblock for ide auto-completion
-*
-* @property bool $comments_enable
-*/
+ * Define docblock for ide auto-completion
+ *
+ * @property bool $comments_enable
+ */
 class Settings extends JsonModel {
 
     protected $casts = ['comments_enable' => BooleanCast::class];
@@ -64,22 +64,22 @@ class Settings extends JsonModel {
 }
 
 /**
-* Define docblock for ide auto-completion
-*
-* @property integer $id
-* @property string $text
-*/
+ * Define docblock for ide auto-completion
+ *
+ * @property integer $id
+ * @property string $text
+ */
 class Comment extends JsonModel {}
 
 /**
-* Define docblock for ide auto-completion
-*
-* @property integer $id
-* @property author $text
-* @property Carbon\Carbon $created_at
-* @property Settings $settings
-* @property CanGelis\DataModels\DataCollection $comments
-*/
+ * Define docblock for ide auto-completion
+ *
+ * @property integer $id
+ * @property author $text
+ * @property Carbon\Carbon $created_at
+ * @property Settings $settings
+ * @property CanGelis\DataModels\DataCollection $comments
+ */
 class Post extends JsonModel {
 
     protected $defaults = ['text' => 'No Text'];
@@ -124,6 +124,23 @@ $post->jsonSerialize() // serialize to json
 {"id":1,"author":"Can Gelis","created_at":"2019-11-14 16:09:32","comments":[{"id":1,"text":"Hello World!"},{"id":2,"text":"What a wonderful world!"},{"id":3,"text":"Not too bad"}],"settings":{"comments_enable":false,"editable":false}}
 */
 
+```
+
+## Available Casts
+
+Here are the available casts.
+
+```php
+
+    CanGelis\DataModels\Cast\BooleanCast
+    CanGelis\DataModels\Cast\FloatCast
+    CanGelis\DataModels\Cast\IntegerCast
+    CanGelis\DataModels\Cast\StringCast
+    // these require nesbot/carbon package to work
+    CanGelis\DataModels\Cast\DateCast
+    CanGelis\DataModels\Cast\DateTimeCast
+    CanGelis\DataModels\Cast\Iso8601Cast
+    
 ```
 
 ## Custom Casts
