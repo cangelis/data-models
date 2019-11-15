@@ -21,7 +21,7 @@ class JsonModel extends DataModel implements \JsonSerializable
      */
     public function jsonSerialize()
     {
-        return json_encode($this->toArray());
+        return $this->toArray();
     }
 
     /**
@@ -29,6 +29,14 @@ class JsonModel extends DataModel implements \JsonSerializable
      */
     public function __toString()
     {
-        return $this->jsonSerialize();
+        return $this->toJson();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toJson()
+    {
+        return json_encode($this->toArray());
     }
 }

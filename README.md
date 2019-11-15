@@ -118,10 +118,10 @@ $post->settings->editable = false // introduce a new attribute
 $post->comments->first() // returns the first comment
 $post->comments[1] // get the second comment
 foreach ($post->comments as $comment) {} // iterate on comments
-$post->comments->add(['id' => 3, 'text' => 'Not too bad']) // add to the collection
+$post->comments->add(new Comment(['id' => 3, 'text' => 'Not too bad'])) // add to the collection
 
 $post->toArray() // see as array
-$post->jsonSerialize() // serialize to json
+$post->toJson() // serialize to json
 
 /*
 {"id":1,"author":"Can Gelis","created_at":"2019-11-14 16:09:32","comments":[{"id":1,"text":"Hello World!"},{"id":2,"text":"What a wonderful world!"},{"id":3,"text":"Not too bad"}],"settings":{"comments_enable":false,"editable":false}}
