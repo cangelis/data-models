@@ -1,6 +1,6 @@
 <?php
 
-use CanGelis\DataModels\DataModel;
+use CanGelis\DataModels\JsonModel;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
  * @property string $foo
  * @property string $baz
  */
-class Settings extends DataModel {
+class Settings extends JsonModel {
 
 }
 
@@ -18,7 +18,7 @@ class Settings extends DataModel {
  *
  * @property \Settings $settings
  */
-class Team extends DataModel {
+class Team extends JsonModel {
 
     protected $hasOne = ['settings' => Settings::class];
 

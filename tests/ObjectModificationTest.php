@@ -2,7 +2,7 @@
 
 use CanGelis\DataModels\Cast\AbstractCast;
 use CanGelis\DataModels\DataCollection;
-use CanGelis\DataModels\DataModel;
+use CanGelis\DataModels\JsonModel;
 use PHPUnit\Framework\TestCase;
 
 // casts the array to datacollection
@@ -22,7 +22,7 @@ class DataCollectionCaster extends AbstractCast
     }
 }
 
-class Menu extends DataModel {
+class Menu extends JsonModel {
 
     protected $casts = [
         'sub_menus' => DataCollectionCaster::class

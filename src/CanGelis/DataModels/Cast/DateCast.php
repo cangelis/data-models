@@ -11,7 +11,7 @@ class DateCast extends AbstractCast
      */
     public function cast($value)
     {
-        return Carbon::createFromTimeString($value);
+        return new Carbon($value);
     }
 
     /**

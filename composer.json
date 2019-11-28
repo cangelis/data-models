@@ -13,11 +13,12 @@
     "php": ">=7.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6"
+    "phpunit/phpunit": "^7||^6||^5",
+    "nesbot/carbon": "^1||^2"
   },
   "suggest": {
-    "nesbot/carbon": "Allows you to cast date attributes",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-simplexml": "*"
   },
   "autoload": {
     "psr-0": {

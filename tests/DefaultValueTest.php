@@ -1,7 +1,7 @@
 <?php
 
 use CanGelis\DataModels\Cast\FloatCast;
-use CanGelis\DataModels\DataModel;
+use CanGelis\DataModels\JsonModel;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * @property string $text
  * @property float $rate
  */
-class Comment extends DataModel {
+class Comment extends JsonModel {
 
     protected $casts = [
         'rate' => FloatCast::class

@@ -1,10 +1,10 @@
 <?php
 
 use CanGelis\DataModels\DataCollection;
-use CanGelis\DataModels\DataModel;
+use CanGelis\DataModels\JsonModel;
 use PHPUnit\Framework\TestCase;
 
-class Post extends DataModel {
+class Post extends JsonModel {
 
 }
 
@@ -13,7 +13,7 @@ class Post extends DataModel {
  *
  * @property DataCollection $posts
  */
-class User extends DataModel {
+class User extends JsonModel {
 
     protected $hasMany = [
         'posts' => Post::class
@@ -79,7 +79,7 @@ class HasManyTest extends TestCase {
     public function testModelValuesAreSetAsExpectedWhenValuesAreProvidedAsCollection()
     {
         $user = new User([]);
-        $user->posts = new DataCollection([new Post(['foo' => 'bar']), ['foo' => 'baz']]);
+        $user->posts = new DataCollection([new Post(['foo' => 'bar']), new Post(['foo' => 'baz'])]);
         $this->assertInstanceOf(DataCollection::class, $user->posts);
         $this->assertEquals('bar', $user->posts[0]->foo);
         $this->assertEquals('baz', $user->posts[1]->foo);

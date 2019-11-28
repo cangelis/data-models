@@ -2,13 +2,8 @@
 
 namespace CanGelis\DataModels;
 
-class DataModel
+abstract class DataModel
 {
-    /**
-     * @var array
-     */
-    protected $data;
-
     /**
      * Casts for the attribute values
      *
@@ -42,40 +37,14 @@ class DataModel
      *
      * @var array
      */
-    private $relations = [];
+    protected $relations = [];
 
     /**
      * Initialized attributes
      *
      * @var array
      */
-    private $attributeValues = [];
-
-    /**
-     * DataModel constructor.
-     *
-     * @param array $data
-     */
-    public function __construct(array $data)
-    {
-        $this->data = $data;
-    }
-
-    /**
-     * Make an array
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data = $this->data;
-        // apply modified relationships
-        foreach ($this->relations as $relationAttribute => $relation) {
-            list($relationType, $attribute) = explode("-", $relationAttribute);
-            $data[$attribute] = $relation->toArray();
-        }
-        return $data;
-    }
+    protected $attributeValues = [];
 
     /**
      * Accessor for the json object
@@ -101,15 +70,15 @@ class DataModel
             return $this->attributeValues[$attribute];
         }
 
-        if (array_key_exists($attribute, $this->data)) {
-            return $this->attributeValues[$attribute] = $this->castValue($attribute, $this->data[$attribute]);
+        if ($this->hasAttribute($attribute)) {
+            return $this->loadAttribute($attribute, $this->getAttribute($attribute));
         }
 
         if (array_key_exists($attribute, $this->getDefaults())) {
-            return $this->attributeValues[$attribute] = $this->castValue($attribute, $this->getDefaults()[$attribute]);
+            return $this->loadAttribute($attribute, $this->getDefaults()[$attribute]);
         }
 
-        return $this->attributeValues[$attribute] = null;
+        return $this->loadAttribute($attribute, null);
     }
 
     /**
@@ -127,91 +96,91 @@ class DataModel
         } elseif (array_key_exists($attribute, $this->hasMany)) {
             $this->setHasManyValue($attribute, $value);
         } else {
-            $this->data[$attribute] = $this->uncastValue($attribute, $value);
-            unset($this->attributeValues[$attribute]);
+            $this->loadAttribute($attribute, $value);
         }
     }
 
     /**
-     * @inheritDoc
+     * Load the attribute
+     *
+     * @param string $attribute
+     * @param mixed $value
+     *
+     * @return mixed
      */
-    public function __isset($name)
+    protected function loadAttribute($attribute, $value)
     {
-        return isset($this->data[$name]);
-    }
+        $this->attributeValues[$attribute] = $this->castValue($attribute, $value);
+        // if the value is already in the source data
+        // it should be unset since we load the value into attributeValues
+        // to avoid duplication
+        $this->onLoadAttribute($attribute);
 
-    /**
-     * @inheritDoc
-     */
-    public function __unset($name)
-    {
-        unset($this->data[$name]);
+        return $this->attributeValues[$attribute];
     }
 
     /**
      * Get has many relationship value
      *
-     * @param mixed $attribute
+     * @param mixed $relation
      *
      * @return \CanGelis\DataModels\DataCollection
      */
-    protected function getHasManyValue($attribute)
+    protected function getHasManyValue($relation)
     {
-        if (isset($this->relations['hasMany-' . $attribute])) {
-            return $this->relations['hasMany-' . $attribute];
+        if ($this->isHasManyRelationLoaded($relation)) {
+            return $this->getLoadedHasManyRelationValue($relation);
         }
 
-        $items = [];
-        if (array_key_exists($attribute, $this->data) && is_array($this->data[$attribute])) {
-            $items = $this->data[$attribute];
-        }
-
-        return $this->relations['hasMany-' . $attribute] = $this->makeCollection(
-            array_map(function ($item) use ($attribute) {
-                return $this->getItemAsObject($item, $this->hasMany[$attribute]);
-            }, $items)
-        );
+        return $this->relations['hasMany-' . $relation] = $this->resolveHasManyRelationShip($relation);
     }
 
     /**
-     * Make the value array if it is an datamodel already
+     * Get the already loaded has many relation value
      *
-     * @param \CanGelis\DataModels\DataModel|array $item
+     * @param string $relation
      *
-     * @return array
+     * @return mixed
      */
-    protected function getItemAsArray($item)
+    protected function getLoadedHasManyRelationValue($relation)
     {
-        if ($item instanceof DataModel) {
-            return $item->toArray();
-        }
-
-        if (is_array($item)) {
-            return $item;
-        }
-
-        throw new \InvalidArgumentException('Expected array or DataModel but ' . gettype($item) . ' given');
+        return $this->relations['hasMany-' . $relation];
     }
 
     /**
-     * Make item an data model
+     * Get the already loaded has one relation value
      *
-     * @param array|\CanGelis\DataModels\DataModel $item
-     * @param string $class
+     * @param string $relation
      *
-     * @return \CanGelis\DataModels\DataModel
+     * @return mixed
      */
-    protected function getItemAsObject($item, $class)
+    protected function getLoadedHasOneRelationValue($relation)
     {
-        if (is_array($item)) {
-            return new $class($item);
-        }
+        return $this->relations['hasOne-' . $relation];
+    }
 
-        if (get_class($item) == $class) {
-            return $item;
-        }
+    /**
+     * Returns true if the given has many relation is already loaded
+     *
+     * @param string $relation
+     *
+     * @return bool
+     */
+    protected function isHasManyRelationLoaded($relation)
+    {
+        return isset($this->relations['hasMany-' . $relation]);
+    }
 
-        throw new \InvalidArgumentException('Expected array or ' . $class . ' but ' . gettype($item) . ' given');
+    /**
+     * Returns true if the given has one relation is already loaded
+     *
+     * @param string $relation
+     *
+     * @return bool
+     */
+    protected function isHasOneRelationLoaded($relation)
+    {
+        return isset($this->relations['hasOne-' . $relation]);
     }
 
     /**
@@ -223,15 +192,11 @@ class DataModel
      */
     protected function getHasOneValue($attribute)
     {
-        if (isset($this->relations['hasOne-' . $attribute])) {
-            return $this->relations['hasOne-' . $attribute];
+        if ($this->isHasOneRelationLoaded($attribute)) {
+            return $this->getLoadedHasOneRelationValue($attribute);
         }
 
-        if (is_array($this->data[$attribute])) {
-            return $this->relations['hasOne-' . $attribute] = new $this->hasOne[$attribute]($this->data[$attribute]);
-        }
-
-        return $this->relations['hasOne-' . $attribute] = null;
+        return $this->relations['hasOne-' . $attribute] = $this->resolveHasOneRelationship($attribute);
     }
 
     /**
@@ -242,8 +207,7 @@ class DataModel
      */
     protected function setHasOneValue($attribute, $value)
     {
-        $this->data[$attribute] = $this->getItemAsArray($value);
-        unset($this->relations['hasOne-' . $attribute]);
+        $this->relations['hasOne-' . $attribute] = $this->setHasOne($attribute, $value);
     }
 
     /**
@@ -254,17 +218,7 @@ class DataModel
      */
     protected function setHasManyValue($attribute, $value)
     {
-        if (is_array($value)) {
-            $this->data[$attribute] = array_map(function ($item) {
-                return $this->getItemAsArray($item);
-            }, $value);
-        } elseif ($value instanceof DataCollection) {
-            $this->data[$attribute] = $value->toArray();
-        } else {
-            throw new \InvalidArgumentException('Expected array or DataCollection but ' . gettype($value) . ' given');
-        }
-
-        unset($this->relations['hasMany-' . $attribute]);
+        $this->relations['hasMany-' . $attribute] = $this->setHasMany($attribute, $value);
     }
 
     /**
@@ -334,4 +288,71 @@ class DataModel
     {
         return new DataCollection($items);
     }
+
+    /**
+     * Resolve has many relationship
+     *
+     * @param string $relation
+     *
+     * @return \CanGelis\DataModels\DataCollection
+     */
+    abstract protected function resolveHasManyRelationship($relation);
+
+    /**
+     * Resolve has one relationship
+     *
+     * @param string $relation
+     *
+     * @return \CanGelis\DataModels\DataModel
+     */
+    abstract protected function resolveHasOneRelationship($relation);
+
+    /**
+     * Set the has one value
+     *
+     * @param string $relation
+     * @param mixed $value
+     *
+     * @return \CanGelis\DataModels\DataModel
+     */
+    abstract protected function setHasOne($relation, $value);
+
+    /**
+     * Set has many relation value
+     *
+     * @param string $relation
+     * @param mixed $value
+     *
+     * @return \CanGelis\DataModels\DataCollection
+     */
+    abstract protected function setHasMany($relation, $value);
+
+    /**
+     * Returns true if the attribute exists
+     *
+     * @param string $attribute
+     *
+     * @return bool
+     */
+    abstract protected function hasAttribute($attribute);
+
+    /**
+     * Get the attribute value
+     *
+     * @param $attribute
+     *
+     * @return mixed
+     */
+    abstract protected function getAttribute($attribute);
+
+    /**
+     * Called when an attribute is loaded
+     * When the value is loaded it can be deleted from the
+     * source data so no duplication will occur during export
+     *
+     * @param string $attribute
+     *
+     * @return mixed
+     */
+    abstract protected function onLoadAttribute($attribute);
 }
