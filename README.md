@@ -2,17 +2,17 @@
 
 [![Build Status](https://travis-ci.org/cangelis/data-models.svg?branch=master)](https://travis-ci.org/cangelis/data-models)
 
-Data models is the beautiful way of working with structured data such as JSON and php arrays. They are basically wrapper classes to the JSON strings or php arrays (markup languages in the future). Models simplify the manipulation and processing workflow of the JSON or php arrays.
+Data models is the beautiful way of working with structured data such as JSON, XML and php arrays. They are basically wrapper classes to the JSON and XML strings or php arrays. Models simplify the manipulation and processing workflow of the JSON, XML or php arrays.
 
 ## Pros
 
 - Straightforward to get started (this page will tell you all the features)
 - Avoid undefined index by design
-- Dynamic access to the model properties so no need of mapping the class properties with JSON attributes
+- Dynamic access to the model properties so no need of mapping the class properties with JSON or XML attributes
 - IDE auto-completion using `@property` docblock and make the API usage documented by default
 - Has many and has one relationships between models
 - Ability to assign default values for the attributes so the undefined attributes can be handled reliably
-- Ability to add logic into the JSON data in the model
+- Ability to add logic into the data in the model
 - Cast values to known types such as integer, string, float, boolean
 - Cast values to Carbon object to work on date attributes easily
 - Ability to implement custom cast types
@@ -22,7 +22,7 @@ Data models is the beautiful way of working with structured data such as JSON an
 
     composer require cangelis/data-models:^1.0
 
-## Usage
+## JSON Usage
 
 Imagine you have a JSON data for a blog post looks like this
 
@@ -128,6 +128,97 @@ $post->toJson() // serialize to json
 */
 
 ```
+
+## XML Usage
+
+It is pretty straightforward and very similar to JSON models.
+
+Imagine an XML data:
+
+```php
+$data = '<Team Color="#ffffff">
+    <Players>
+        <Player><Name>Beckham</Name><BirthDate>1975-05-02</BirthDate></Player>
+        <Player><Name>Zidane</Name><BirthDate>1972-06-23</BirthDate></Player>
+    </Players>
+    <TeamLocation>
+       <City>Istanbul</City>
+       <Country>Turkey</Country>     
+    </TeamLocation>
+</Team>';
+```
+
+You can setup a relationship looks like this:
+
+```php
+use CanGelis\DataModels\XmlModel;
+use CanGelis\DataModels\Cast\DateCast;
+
+class Player extends XmlModel {
+
+    // root tag name <Player></Player>
+    protected $root = 'Player';
+
+    protected $casts = ['BirthDate' => DateCast::class];
+
+}
+
+class Address extends Xmlmodel {
+
+    protected $root = 'Address';
+
+}
+
+class Team extends XmlModel {
+    
+    protected $root = 'Team';
+
+    protected $hasMany = [
+        'Players' => Player::class
+    ];
+    
+    protected $hasOne = [
+        'TeamLocation' => Address::class
+    ];
+    
+    // the attributes in this array will be
+    // behave as XML attributes see the example
+    protected $attributes = ['Color'];
+
+}
+```
+
+Once you setup the relationships and your data, you start using the data.
+
+```
+$team = Team::fromString($data);
+echo $team->TeamLocation->City; // returns Istanbul
+$team->TeamLocation->City = 'Madrid'; // update the city
+echo $team->Players->count(); // number of players
+echo $team->Players[0]->Name; // gets first player's name
+echo $team->Color; // gets the Color XML attribute
+$team->Color = '#000000'; // update the XML Attribute
+echo get_class($team->Players[0]->BirthDate); // returns Carbon\Carbon
+$team->Players->add(Player::fromArray(['Name' => 'Ronaldinho'])); // add a new player
+echo (string) $team; // make an xml string
+```
+
+The resulting XML will be;
+
+```
+<Team Color="#000000">
+	<TeamLocation>
+		<Country>Turkey</Country>
+		<City>Madrid</City>
+	</TeamLocation>
+	<Players>
+		<Player><Name>Beckham</Name><BirthDate>1975-05-02</BirthDate></Player>
+		<Player><Name>Zidane</Name><BirthDate>1972-06-23</BirthDate></Player>
+		<Player><Name>Ronaldinho</Name></Player>
+	</Players>
+</Team>
+```
+
 
 ## Available Casts
 
