@@ -214,17 +214,11 @@ class XmlModel extends DataModel
      */
     protected function getAttribute($attribute)
     {
-        if (!array_key_exists($attribute, $this->attributes)) {
+        if (!in_array($attribute, $this->attributes)) {
             return isset($this->data->{$attribute}) ? (string)$this->data->{$attribute} : null;
         }
 
-        foreach ($this->data->attributes() as $key => $value) {
-            if ($key == $attribute) {
-                return $value;
-            }
-        }
-
-        return null;
+        return isset($this->data[$attribute]) ? (string)$this->data[$attribute] : null;
     }
 
     /**
@@ -232,17 +226,11 @@ class XmlModel extends DataModel
      */
     protected function hasAttribute($attribute)
     {
-        if (!array_key_exists($attribute, $this->attributes)) {
+        if (!in_array($attribute, $this->attributes)) {
             return isset($this->data->{$attribute});
         }
 
-        foreach ($this->data->attributes() as $key => $value) {
-            if ($key == $attribute) {
-                return true;
-            }
-        }
-
-        return false;
+        return isset($this->data[$attribute]);
     }
 
     /**
@@ -250,7 +238,11 @@ class XmlModel extends DataModel
      */
     protected function onLoadAttribute($attribute)
     {
-        unset($this->data->{$attribute});
+        if (!in_array($attribute, $this->attributes)) {
+            unset($this->data->{$attribute});
+        } else {
+            unset($this->data[$attribute]);
+        }
     }
 
     /**
@@ -258,7 +250,11 @@ class XmlModel extends DataModel
      */
     public function __unset($name)
     {
-        unset($this->data->{$name});
+        if (!in_array($name, $this->attributes)) {
+            unset($this->data->{$name});
+        } else {
+            unset($this->data[$name]);
+        }
         unset($this->relations[$name]);
         unset($this->attributeValues[$name]);
     }
