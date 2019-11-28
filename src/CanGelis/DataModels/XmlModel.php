@@ -133,6 +133,32 @@ class XmlModel extends DataModel
     /**
      * @inheritDoc
      */
+    public function __unset($name)
+    {
+        if (!in_array($name, $this->attributes)) {
+            unset($this->data->{$name});
+        } else {
+            unset($this->data[$name]);
+        }
+        unset($this->relations[$name]);
+        unset($this->attributeValues[$name]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function __isset($attribute)
+    {
+        if (!in_array($attribute, $this->attributes)) {
+            return isset($this->data->{$attribute});
+        }
+
+        return isset($this->data[$attribute]);
+    }
+
+    /**
+     * @inheritDoc
+     */
     protected function resolveHasOneRelationship($relation)
     {
         if (isset($this->data->{$relation})) {
@@ -243,19 +269,5 @@ class XmlModel extends DataModel
         } else {
             unset($this->data[$attribute]);
         }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function __unset($name)
-    {
-        if (!in_array($name, $this->attributes)) {
-            unset($this->data->{$name});
-        } else {
-            unset($this->data[$name]);
-        }
-        unset($this->relations[$name]);
-        unset($this->attributeValues[$name]);
     }
 }

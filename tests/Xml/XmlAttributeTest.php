@@ -60,4 +60,13 @@ class XmlAttributeTest extends TestCase
         unset($post->name);
         $this->assertEquals('<post title="Foo"/>', (string) $post);
     }
+
+    public function testIsset()
+    {
+        $post = XmlPost::fromString('<post title="Foo" bar="baz"><name>Bar</name></post>');
+        $this->assertTrue(isset($post->title));
+        $this->assertTrue(isset($post->name));
+        // not defined as an attribute so this should return false
+        $this->assertFalse(isset($post->bar));
+    }
 }

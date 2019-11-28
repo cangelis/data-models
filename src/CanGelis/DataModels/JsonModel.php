@@ -10,27 +10,6 @@ class JsonModel extends DataModel implements \JsonSerializable
     protected $data;
 
     /**
-     * Make an array
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        $data = $this->data;
-        // apply modified relationships
-        foreach ($this->relations as $relationAttribute => $relation) {
-            list($relationType, $attribute) = explode("-", $relationAttribute);
-            $data[$attribute] = $relation->toArray();
-        }
-
-        foreach ($this->attributeValues as $attribute => $value) {
-            $data[$attribute] = $this->uncastValue($attribute, $value);
-        }
-
-        return $data;
-    }
-
-    /**
      * DataModel constructor.
      *
      * @param array $data
@@ -50,6 +29,28 @@ class JsonModel extends DataModel implements \JsonSerializable
     public static function fromString($json)
     {
         return new static(json_decode($json, true));
+    }
+
+    /**
+     * Make an array
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $data = $this->data;
+
+        // apply modified relationships
+        foreach ($this->relations as $relationAttribute => $relation) {
+            list($relationType, $attribute) = explode("-", $relationAttribute);
+            $data[$attribute] = $relation->toArray();
+        }
+
+        foreach ($this->attributeValues as $attribute => $value) {
+            $data[$attribute] = $this->uncastValue($attribute, $value);
+        }
+
+        return $data;
     }
 
     /**
@@ -134,11 +135,13 @@ class JsonModel extends DataModel implements \JsonSerializable
                 $collection->add($this->getItemAsObject($item, $this->hasMany[$relation]));
             }
             return $collection;
-        } elseif ($value instanceof DataCollection) {
-            return $value;
-        } else {
-            throw new \InvalidArgumentException('Expected array or DataCollection but ' . gettype($value) . ' given');
         }
+
+        if ($value instanceof DataCollection) {
+            return $value;
+        }
+
+        throw new \InvalidArgumentException('Expected array or DataCollection but ' . gettype($value) . ' given');
     }
 
     /**
@@ -147,9 +150,12 @@ class JsonModel extends DataModel implements \JsonSerializable
     protected function resolveHasManyRelationship($relation)
     {
         $items = [];
+
         if (array_key_exists($relation, $this->data) && is_array($this->data[$relation])) {
             $items = $this->data[$relation];
         }
+
+        unset($this->data[$relation]);
 
         return $this->makeCollection(
             array_map(function ($item) use ($relation) {
@@ -164,7 +170,9 @@ class JsonModel extends DataModel implements \JsonSerializable
     protected function resolveHasOneRelationship($relation)
     {
         if (is_array($this->data[$relation])) {
-            return new $this->hasOne[$relation]($this->data[$relation]);
+            $model = new $this->hasOne[$relation]($this->data[$relation]);
+            unset($this->data[$relation]);
+            return $model;
         }
 
         return null;
