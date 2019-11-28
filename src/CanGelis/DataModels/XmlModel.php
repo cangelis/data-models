@@ -21,15 +21,18 @@ class XmlModel extends DataModel
      *
      * @var string
      */
-    public static $name = 'root';
+    protected $root = 'root';
 
     /**
      * @inheritDoc
      */
-    public function __construct(\SimpleXMLElement $data = null)
+    public function __construct(\SimpleXMLElement $data = null, $root = null)
     {
+        if (is_null($root)) {
+            $root = $this->root;
+        }
         if (is_null($data)) {
-            $data = new \SimpleXMLElement('<' . static::$name . '></' . static::$name . '>');
+            $data = new \SimpleXMLElement('<' . $root . '></' . $root . '>');
         }
         $this->data = $data;
     }
@@ -38,28 +41,26 @@ class XmlModel extends DataModel
      * Initialize from XML string
      *
      * @param string $data
+     * @param string $root
      *
      * @return static
      */
-    public static function fromString($data)
+    public static function fromString($data, $root = null)
     {
-        return new static(simplexml_load_string($data));
+        return new static(simplexml_load_string($data), $root);
     }
 
     /**
      * Make an instance from an array
      *
-     * @param array $data
-     * @param string $class
+     * @param array  $data
+     * @param string $root
      *
      * @return static
      */
-    public static function fromArray(array $data, $class = null)
+    public static function fromArray(array $data, $root = null)
     {
-        if (is_null($class)) {
-            $class = static::class;
-        }
-        $instance = new $class();
+        $instance = new static(null, $root);
         foreach ($data as $key => $value) {
             $instance->{$key} = $value;
         }
@@ -159,7 +160,7 @@ class XmlModel extends DataModel
     {
         $relatedClass = $this->hasOne[$relation];
         if (is_array($value)) {
-            return $relatedClass::fromArray($value);
+            return $relatedClass::fromArray($value, $relation);
         }
 
         if ($value instanceof XmlModel) {
@@ -167,7 +168,7 @@ class XmlModel extends DataModel
         }
 
         if ($value instanceof \SimpleXMLElement) {
-            return new $relatedClass($value);
+            return new $relatedClass($value, $relation);
         }
     }
 

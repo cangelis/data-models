@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 class XmlPlayer extends XmlModel {
 
-    public static $name = 'player';
+    protected $root = 'player';
 
 }
 

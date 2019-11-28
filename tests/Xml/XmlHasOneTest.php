@@ -5,13 +5,13 @@ use PHPUnit\Framework\TestCase;
 
 class DetailedXmlSettings extends XmlModel {
 
-    public static $name = 'detailed_settings';
+    protected $root = 'detailed_settings';
 
 }
 
 class XmlSettings extends XmlModel {
 
-    public static $name = 'settings';
+    protected $root = 'settings';
 
     protected $hasOne = [
         'detailed_settings' => DetailedXmlSettings::class
@@ -23,10 +23,11 @@ class XmlSettings extends XmlModel {
 
 class XmlUser extends XmlModel {
 
-    public static $name = 'user';
+    protected $root = 'user';
 
     protected $hasOne = [
-        'settings' => XmlSettings::class
+        'settings' => XmlSettings::class,
+        'different_settings' => XmlSettings::class
     ];
 }
 
@@ -77,5 +78,12 @@ class XmlHasOneTest extends TestCase
         $user = XmlUser::fromString('<user></user>');
         $user->settings = ['blog_url' => 'http://foo.bar', 'foo' => 'bar'];
         $this->assertContains('<user><settings blog_url="http://foo.bar"><foo>bar</foo></settings></user>', (string) $user);
+    }
+
+    public function testRelationNameIsUsedForHasOneRelationships()
+    {
+        $user = XmlUser::fromString('<user></user>');
+        $user->different_settings = ['foo' => 'bar'];
+        $this->assertContains('<user><different_settings><foo>bar</foo></different_settings></user>', (string) $user);
     }
 }
