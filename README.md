@@ -20,7 +20,7 @@ Data models is the beautiful way of working with structured data such as JSON, X
 
 ## Install
 
-    composer require cangelis/data-models:^1.0
+    composer require cangelis/data-models:^2.0
 
 ## JSON Usage
 
