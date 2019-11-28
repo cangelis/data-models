@@ -190,22 +190,27 @@ class Team extends XmlModel {
 
 Once you setup the relationships and your data, you start using the data.
 
-```
+```php
 $team = Team::fromString($data);
+
 echo $team->TeamLocation->City; // returns Istanbul
 $team->TeamLocation->City = 'Madrid'; // update the city
+
 echo $team->Players->count(); // number of players
 echo $team->Players[0]->Name; // gets first player's name
+
 echo $team->Color; // gets the Color XML attribute
 $team->Color = '#000000'; // update the XML Attribute
+
 echo get_class($team->Players[0]->BirthDate); // returns Carbon\Carbon
 $team->Players->add(Player::fromArray(['Name' => 'Ronaldinho'])); // add a new player
+
 echo (string) $team; // make an xml string
 ```
 
 The resulting XML will be;
 
-```
+```xml
 <Team Color="#000000">
 	<TeamLocation>
 		<Country>Turkey</Country>
