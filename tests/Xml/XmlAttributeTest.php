@@ -54,7 +54,7 @@ class XmlAttributeTest extends TestCase
         $this->assertEquals('<post/>', (string) $post);
     }
 
-    public function tesChildCanBeUnset()
+    public function testChildCanBeUnset()
     {
         $post = XmlPost::fromString('<post title="Foo"><name>Bar</name></post>');
         unset($post->name);
