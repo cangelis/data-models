@@ -31,10 +31,12 @@ class XmlModel extends DataModel
         if (is_null($root)) {
             $root = $this->root;
         }
+
         if (is_null($data)) {
             $data = new \SimpleXMLElement('<' . $root . '></' . $root . '>');
         }
-        $this->data = $data;
+
+        $this->data = clone $data;
     }
 
     /**
@@ -80,7 +82,7 @@ class XmlModel extends DataModel
         foreach ($this->attributeValues as $attribute => $value) {
             $value = $this->uncastValue($attribute, $value);
             if (in_array($attribute, $this->attributes)) {
-                $xmlElement->addAttribute($attribute, $value);
+                $xmlElement[$attribute] = $value;
             } else {
                 $xmlElement->addChild($attribute, $value);
             }
@@ -89,11 +91,11 @@ class XmlModel extends DataModel
         // resolve dynamic has many relations
         foreach ($this->relations as $relationAttribute => $value) {
             list($relationType, $relation) = explode("-", $relationAttribute);
-            // has one relationships are already in the data loaded
             if ($relationType == 'hasOne') {
                 static::addChild($xmlElement, $value->toXMLElement());
             } else {
-                $xmlElement->{$relation} = new \SimpleXMLElement('<' . $relation . '></' . $relation . '>');
+                $parent = new \SimpleXMLElement('<' . $relation . '></' . $relation . '>');
+                static::addChild($xmlElement, $parent);
                 foreach ($value as $xmlModel) {
                     static::addChild($xmlElement->{$relation}, $xmlModel->toXMLElement());
                 }
@@ -134,7 +136,9 @@ class XmlModel extends DataModel
     protected function resolveHasOneRelationship($relation)
     {
         if (isset($this->data->{$relation})) {
-            return new $this->hasOne[$relation]($this->data->{$relation});
+            $model = new $this->hasOne[$relation]($this->data->{$relation}, $relation);
+            unset($this->data->{$relation});
+            return $model;
         }
 
         return null;
@@ -147,8 +151,10 @@ class XmlModel extends DataModel
     {
         $items = [];
         foreach ($this->data->{$relation}->children() as $child) {
-            $items[] = new $this->hasMany[$relation]($child);
+            $items[] = new $this->hasMany[$relation]($child, $child->getName());
         }
+
+        unset($this->data->{$relation});
 
         return $this->makeCollection($items);
     }
@@ -192,7 +198,7 @@ class XmlModel extends DataModel
             }
 
             if ($value instanceof \SimpleXMLElement) {
-                $collection->add(new $class($value));
+                $collection->add(new $class($value, $value->getName()));
             }
         }
 

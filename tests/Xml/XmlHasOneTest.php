@@ -86,4 +86,11 @@ class XmlHasOneTest extends TestCase
         $user->different_settings = ['foo' => 'bar'];
         $this->assertContains('<user><different_settings><foo>bar</foo></different_settings></user>', (string) $user);
     }
+
+    public function testNoDuplicationInTheModifiedRelationship()
+    {
+        $user = XmlUser::fromString('<user><different_settings><foo>bar</foo></different_settings></user>');
+        $user->different_settings->baz = "bazzer";
+        $this->assertContains('<user><different_settings><foo>bar</foo><baz>bazzer</baz></different_settings></user>', (string) $user);
+    }
 }

@@ -12,6 +12,8 @@ class XmlPlayer extends XmlModel {
 
 class XmlTeam extends XmlModel {
 
+    protected $root = 'team';
+
     protected $hasMany = ['players' => XmlPlayer::class];
 
 }
