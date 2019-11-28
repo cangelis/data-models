@@ -39,6 +39,13 @@ class HasOneTest extends TestCase
         $this->assertEquals('bar', $user->settings->foo);
     }
 
+    public function testRelationIsModified()
+    {
+        $team = new Team(['settings' => ['foo' => 'bar']]);
+        $team->settings->foo = 'baz';
+        $this->assertEquals(json_encode(['settings' => ['foo' => 'baz']]), (string) $team);
+    }
+
     /**
      * @expectedException \InvalidArgumentException
      */

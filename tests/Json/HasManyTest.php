@@ -31,6 +31,13 @@ class HasManyTest extends TestCase {
         $this->assertEquals(2, $user->posts->count());
     }
 
+    public function testRelationsAreModified()
+    {
+        $user = new User(['posts' => [['foo' => 'bar']]]);
+        $user->posts[0]->foo = 'baz';
+        $this->assertEquals(json_encode(['posts' => [['foo' => 'baz']]]), (string) $user);
+    }
+
     public function testReturnEmptyCollectionWhenAttributeDoesNotExist()
     {
         $user = new User([]);
