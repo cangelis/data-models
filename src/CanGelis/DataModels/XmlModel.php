@@ -176,11 +176,14 @@ class XmlModel extends DataModel
     protected function resolveHasManyRelationship($relation)
     {
         $items = [];
-        foreach ($this->data->{$relation}->children() as $child) {
-            $items[] = new $this->hasMany[$relation]($child, $child->getName());
-        }
 
-        unset($this->data->{$relation});
+        if (isset($this->data->{$relation})) {
+            foreach ($this->data->{$relation}->children() as $child) {
+                $items[] = new $this->hasMany[$relation]($child, $child->getName());
+            }
+
+            unset($this->data->{$relation});
+        }
 
         return $this->makeCollection($items);
     }
